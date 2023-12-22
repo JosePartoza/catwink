@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catwink</title>
+    <link rel="icon" href="winkicon.jpg" type="image/x-icon">
+    <style>
+        body {
+            background: linear-gradient(-45deg,#ee7752,#e73c7e,#23a6d5,#23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite
+        }
+
+        @keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+        #musicIcon {
+            position: fixed;
+            top: 20px;
+            right: 40px;
+            cursor: pointer;
+            z-index: 1; /* Ensure the image is on top */
+        }
+
+        #clickArea {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        #textContainer {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            z-index: 2;
+            font-size: 24px;
+        }
+
+        #subText {
+            font-size: 24px;
+            color: white;
+            overflow: hidden;
+            border-right: 2px solid white; /* Cursor effect */
+            white-space: nowrap; /* Keep the text in one line */
+            margin: 0 auto; /* Center the text */
+            animation: typing 4s steps(40) infinite, blink-caret 0.75s step-end infinite;
+            margin-top: 550px; /* Adjust the margin-top as needed */
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: white; }
+        }
+
+        #gifImage {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0; /* Behind other elements */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Placeholder MP3 file for testing -->
+    <audio id="backgroundMusic" loop>
+        <source src="pump.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <img id="musicIcon" src="music.png" alt="Music Icon" width="70" height="70" onclick="toggleMusic()">
+    <div id="clickArea" onclick="startMusic(); clickEffect();"></div>
+
+    <div id="textContainer">
+    <div id="textArea">Click anywhere to Start Pumping 🚀<br>
+                        (Make sure to Sit tight and Turn up volume)
+        </div>
+    <div id="subText"></div>
+    </div>
+     <!-- GIF image -->
+     <img id="gifImage" src="catwinkgif.gif" alt="GIF Image" width="500" height="500">
+
+    <script>
+        var music = document.getElementById("backgroundMusic");
+        var musicIcon = document.getElementById("musicIcon");
+
+        function startMusic() {
+            if (music.paused) {
+                music.play();
+            }
+        }
+
+        function toggleMusic() {
+            if (music.muted) {
+                music.muted = false; // Unmute
+                musicIcon.src = "music.png"; // Change to unmuted icon
+            } else {
+                music.muted = true; // Mute
+                musicIcon.src = "muted.png"; // Change to muted icon
+            }
+        }
+
+
+// Auto change color every 5 seconds (5000 milliseconds)
+setInterval(changeColor, 5000);
+    </script>
+
+    <script>
+        // Paste the clickEffect function here
+        function clickEffect() {
+            let balls = [];
+            let longPressed = false;
+            let longPress;
+            let multiplier = 0;
+            let width, height;
+            let origin;
+            let normal;
+            let ctx;
+            const colours = ["#F73859", "#14FFEC", "#00E0FF", "#FF99FE", "#FAF15D"];
+            const canvas = document.createElement("canvas");
+            document.body.appendChild(canvas);
+            canvas.setAttribute(
+                "style",
+                "width: 100%; height: 100%; top: 0; left: 0; z-index: 99999; position: fixed; pointer-events: none;"
+            );
+            const pointer = document.createElement("span");
+            pointer.classList.add("pointer");
+            document.body.appendChild(pointer);
+
+            if (canvas.getContext && window.addEventListener) {
+                ctx = canvas.getContext("2d");
+                updateSize();
+                window.addEventListener("resize", updateSize, false);
+                loop();
+                window.addEventListener(
+                    "mousedown",
+                    function (e) {
+                        pushBalls(randBetween(10, 20), e.clientX, e.clientY);
+                        document.body.classList.add("is-pressed");
+                        longPress = setTimeout(function () {
+                            document.body.classList.add("is-longpress");
+                            longPressed = true;
+                        }, 500);
+                    },
+                    false
+                );
+                window.addEventListener(
+                    "mouseup",
+                    function (e) {
+                        clearInterval(longPress);
+                        if (longPressed == true) {
+                            document.body.classList.remove("is-longpress");
+                            pushBalls(
+                                randBetween(
+                                    50 + Math.ceil(multiplier),
+                                    100 + Math.ceil(multiplier)
+                                ),
+                                e.clientX,
+                                e.clientY
+                            );
+                            longPressed = false;
+                        }
+                        document.body.classList.remove("is-pressed");
+                    },
+                    false
+                );
+                window.addEventListener(
+                    "mousemove",
+                    function (e) {
+                        let x = e.clientX;
+                        let y = e.clientY;
+                        pointer.style.top = y + "px";
+                        pointer.style.left = x + "px";
+                    },
+                    false
+                );
+            } else {
+                console.log("canvas or addEventListener is unsupported!");
+            }
+
+            function updateSize() {
+                canvas.width = window.innerWidth * 2;
+                canvas.height = window.innerHeight * 2;
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+                ctx.scale(2, 2);
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                origin = {
+                    x: width / 2,
+                    y: height / 2,
+                };
+                normal = {
+                    x: width / 2,
+                    y: height / 2,
+                };
+            }
+            class Ball {
+                constructor(x = origin.x, y = origin.y) {
+                    this.x = x;
+                    this.y = y;
+                    this.angle = Math.PI * 2 * Math.random();
+                    if (longPressed == true) {
+                        this.multiplier = randBetween(14 + multiplier, 15 + multiplier);
+                    } else {
+                        this.multiplier = randBetween(6, 12);
+                    }
+                    this.vx = (this.multiplier + Math.random() * 0.5) * Math.cos(this.angle);
+                    this.vy = (this.multiplier + Math.random() * 0.5) * Math.sin(this.angle);
+                    this.r = randBetween(8, 12) + 3 * Math.random();
+                    this.color = colours[Math.floor(Math.random() * colours.length)];
+
+                    this.image = new Image();
+                    this.image.src = "catwink.png"; // Replace with your image path
+                    this.scale = 3; // Adjust as needed
+                    this.radius = randBetween(8, 12) + 3 * Math.random();
+                    this.vx = randBetween(-5, 5);
+                    this.vy = randBetween(-10, -5);
+                    this.gravity = 0.5;
+                    this.bounce = 0.7;
+                }
+                update() {
+                    const scaledRadius = this.radius * this.scale;
+
+                    this.x += this.vx;
+                    this.y += this.vy;
+
+                    this.vy += this.gravity;
+
+                    if (this.x - scaledRadius < 0 || this.x + scaledRadius > width) {
+                        this.vx *= -this.bounce;
+                    }
+
+                    if (this.y + scaledRadius > height) {
+                        this.y = height - scaledRadius;
+                        this.vy *= -this.bounce;
+                    }
+                }
+
+                render(ctx) {
+                    const scaledRadius = this.r * this.scale;
+                    ctx.drawImage(
+                        this.image,
+                        this.x - scaledRadius,
+                        this.y - scaledRadius,
+                        scaledRadius * 2,
+                        scaledRadius * 2
+                    );
+                }
+            }
+
+            function pushBalls(count = 1, x = origin.x, y = origin.y) {
+                for (let i = 0; i < count; i++) {
+                    balls.push(new Ball(x, y));
+                }
+            }
+
+            function randBetween(min, max) {
+                return Math.floor(Math.random() * max) + min;
+            }
+
+            function loop() {
+                ctx.fillStyle = "rgba(255, 255, 255, 0)";
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let i = 0; i < balls.length; i++) {
+                    let b = balls[i];
+                    if (b.r < 0) continue;
+                    b.render(ctx);
+                    b.update();
+                }
+                if (longPressed == true) {
+                    multiplier += 0.2;
+                } else if (!longPressed && multiplier >= 0) {
+                    multiplier -= 0.4;
+                }
+                removeBall();
+                requestAnimationFrame(loop);
+            }
+
+            function removeBall() {
+                for (let i = 0; i < balls.length; i++) {
+                    let b = balls[i];
+                    if (
+                        b.x + b.r < 0 ||
+                        b.x - b.r > width ||
+                        b.y + b.r < 0 ||
+                        b.y - b.r > height ||
+                        b.r < 0
+                    ) {
+                        balls.splice(i, 1);
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        // Add these lines to your existing code
+
+        const subText = document.getElementById("subText");
+        const textArray = [
+            "Miracles are about to descend. Stay tuned.",
+            "Embarking on a kitty journey soon.",
+            "Get ready to enter a winking kitty adventure.",
+            "Fantasy turning into reality, keep a winking eye out.",
+            "Our story is being woven.",
+            "Unveiling the mystery shortly.",
+            "The gates to a new world are about to open.",
+            "Building vistas unseen before.",
+            "A world of dreams is on its way.",
+            "Prepare to witness the wonders of the kitty realm."
+        ];
+
+        let currentIndex = 0;
+        let wordIndex = 0;
+
+        function typeText() {
+            const currentText = textArray[currentIndex];
+            const words = currentText.split(' ');
+
+            if (wordIndex < words.length) {
+                subText.innerHTML = words.slice(0, wordIndex + 1).join(' ') + ' ';
+                wordIndex++;
+                setTimeout(typeText, 350); // Adjust the delay as needed
+            } else {
+                currentIndex = (currentIndex + 1) % textArray.length;
+                wordIndex = 0;
+                setTimeout(typeText, 3000); // Wait for 2 seconds before typing the next sentence
+            }
+        }
+
+        // Call the function to start typing
+        window.onload = () => {
+            typeText();
+        };
+    </script>
+
+</body>
+</html>
